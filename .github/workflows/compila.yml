@@ -1,0 +1,37 @@
+name: Compila APK con Buildozer
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout del codice
+      uses: actions/checkout@v4
+
+    - name: Configura Python 3.10
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Installa le dipendenze di sistema Android
+      run: |
+        sudo apt update
+        sudo apt install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libssl-dev cmake
+
+    - name: Compila l'APK con Buildozer Action
+      uses: Artemis21/buildozer-action@v3
+      with:
+        buildozer_version: stable
+        command: buildozer android debug
+        repository_root: .
+
+    - name: Carica l'APK finale nei download di GitHub
+      uses: actions/upload-artifact@v4
+      with:
+        name: Bedge-APK-Debug
+        path: bin/*.apk
