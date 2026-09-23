@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Checkout del codice
@@ -18,17 +18,21 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Installa le dipendenze di sistema Android
+    - name: Installa le dipendenze di sistema Android e Kivy
       run: |
         sudo apt update
-        sudo apt install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libssl-dev cmake
+        sudo apt install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libssl-dev cmake python3-pip
+        sudo apt install -y libffi-dev libssl-dev
+        pip install --upgrade pip
+        pip install buildozer cython git+https://github.com
 
-    - name: Compila l'APK con Buildozer Action Ufficiale
-      uses: ArtemSBulgakov/buildozer-action@v1
-      with:
-        buildozer_version: stable
-        command: buildozer android debug
-        repository_root: .
+    - name: Compila l'APK con Buildozer
+      run: |
+        # Accetta in automatico le licenze Android prima di compilare
+        mkdir -p ~/.buildozer
+        echo "android.accept_sdk_license = True" >> buildozer.spec
+        # Avvia la compilazione
+        buildozer android debug
 
     - name: Carica l'APK finale nei download di GitHub
       uses: actions/upload-artifact@v4
